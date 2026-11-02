@@ -353,9 +353,11 @@
     </div>
   </div>
 
-  <script src="config.js"></script>
+  <script src="config.js?v=2.3"></script>
   <script>
-    const API_BASE = window.API_BASE || '';
+    const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://127.0.0.1:5000'
+      : (window.API_BASE || 'https://mcu-ai-trim-backend-tu38.onrender.com');
 
     // If already logged in, redirect to dashboard
     if (localStorage.getItem('mcu_user')) {
@@ -385,18 +387,29 @@
       e.preventDefault();
       hideError();
       const btn = document.getElementById('btn-login-submit');
-      btn.textContent = 'Signing in...';
+      btn.textContent = 'Connecting to server...';
       btn.disabled = true;
+
+      const progressTimer = setTimeout(() => {
+        btn.textContent = 'Waking up backend server (Render spin-up)...';
+      }, 3000);
 
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
 
       try {
         const res = await fetch(`${API_BASE}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ email, password }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
+        clearTimeout(progressTimer);
+
         const data = await res.json();
         if (!data.success) {
           showError(data.error || 'Invalid credentials');
@@ -409,7 +422,12 @@
         localStorage.setItem('mcu_user_data', JSON.stringify(data.user));
         window.location.href = 'index.html';
       } catch (err) {
-        showError('Unable to connect to backend server. Please verify API is running.');
+        clearTimeout(timeoutId);
+        clearTimeout(progressTimer);
+        const errMsg = err.name === 'AbortError' 
+          ? 'Backend server request timed out after 60s. Please try again.' 
+          : `Network Error: ${err.message || 'Cannot reach API'}. Please ensure backend is awake.`;
+        showError(errMsg);
         btn.textContent = 'Sign In to Dashboard';
         btn.disabled = false;
       }
@@ -420,18 +438,29 @@
       e.preventDefault();
       hideError();
       const btn = document.getElementById('btn-register-submit');
-      btn.textContent = 'Creating account...';
+      btn.textContent = 'Connecting to server...';
       btn.disabled = true;
+
+      const progressTimer = setTimeout(() => {
+        btn.textContent = 'Waking up backend server (Render spin-up)...';
+      }, 3000);
 
       const email = document.getElementById('reg-email').value;
       const password = document.getElementById('reg-password').value;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
 
       try {
         const res = await fetch(`${API_BASE}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ email, password }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
+        clearTimeout(progressTimer);
+
         const data = await res.json();
         if (!data.success) {
           showError(data.error || 'Failed to create account');
@@ -444,7 +473,12 @@
         localStorage.setItem('mcu_user_data', JSON.stringify(data.user));
         window.location.href = 'index.html';
       } catch (err) {
-        showError('Unable to connect to backend server. Please verify API is running.');
+        clearTimeout(timeoutId);
+        clearTimeout(progressTimer);
+        const errMsg = err.name === 'AbortError' 
+          ? 'Backend server request timed out after 60s. Please try again.' 
+          : `Network Error: ${err.message || 'Cannot reach API'}. Please ensure backend is awake.`;
+        showError(errMsg);
         btn.textContent = 'Create Account';
         btn.disabled = false;
       }
