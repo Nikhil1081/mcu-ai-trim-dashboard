@@ -35,8 +35,26 @@ os.makedirs("uploads",exist_ok=True); os.makedirs("downloads",exist_ok=True)
 TRIM_TARGETS=["bg_trim_code_opt","hsi_trim_code_opt","ldo_trim_code_opt"]
 NAMES={"bg_trim_code_opt":"Bandgap Trim Code","hsi_trim_code_opt":"HSI Trim Code","ldo_trim_code_opt":"LDO Trim Code"}
 
-MODELS={t:joblib.load(f"models/{t}_model.joblib") for t in TRIM_TARGETS}
-MODELS["final_pass"]=joblib.load("models/final_pass_model.joblib")
+def load_models():
+    os.makedirs("models", exist_ok=True)
+    try:
+        models = {t: joblib.load(f"models/{t}_model.joblib") for t in TRIM_TARGETS}
+        models["final_pass"] = joblib.load("models/final_pass_model.joblib")
+        return models
+    except Exception as e:
+        print(f"[Startup] Joblib unpickling notice ({e}). Retraining models for runtime environment...")
+        from src.train_models import train
+        train()
+        models = {t: joblib.load(f"models/{t}_model.joblib") for t in TRIM_TARGETS}
+        models["final_pass"] = joblib.load("models/final_pass_model.joblib")
+        print("[Startup] Retraining complete. Models loaded successfully.")
+        return models
+
+MODELS = load_models()
+if not os.path.exists("models/metrics.json") or not os.path.exists("models/feature_columns.json"):
+    from src.train_models import train
+    train()
+
 METRICS=json.load(open("models/metrics.json"))
 COLS=json.load(open("models/feature_columns.json"))
 REQ=["die_x","die_y","x_mm","y_mm","radius_mm","pcm_vth_n_mV","pcm_vth_p_mV","pcm_rs_ohm_sq","pcm_tox_A","pcm_mobility_rel","bg_untrim_V","hsi_untrim_MHz","ldo_untrim_V","ts_cal1_30C_counts","sram_fail_bits","derivative","package","temp_grade"]
