@@ -1,0 +1,55 @@
+{
+  "cleaning_report": {
+    "initial_rows": 8420,
+    "initial_columns": 42,
+    "duplicates_removed": 0,
+    "missing_values_after_cleaning": 0,
+    "final_rows": 8420,
+    "final_columns": 42
+  },
+  "models": {
+    "bg_trim_code_opt": {
+      "MAE": 0.1783,
+      "RMSE": 0.5076,
+      "R2": 0.9903,
+      "exact_match_accuracy": 0.8337,
+      "within_1_code_accuracy": 0.9976
+    },
+    "hsi_trim_code_opt": {
+      "MAE": 0.7554,
+      "RMSE": 1.1908,
+      "R2": 0.997,
+      "exact_match_accuracy": 0.4982,
+      "within_1_code_accuracy": 0.8141
+    },
+    "ldo_trim_code_opt": {
+      "MAE": 0.0938,
+      "RMSE": 0.3063,
+      "R2": 0.9744,
+      "exact_match_accuracy": 0.9062,
+      "within_1_code_accuracy": 1.0
+    },
+    "final_pass": {
+      "accuracy": 0.9947,
+      "precision": 0.9964,
+      "recall": 0.9982,
+      "f1_score": 0.9973,
+      "confusion_matrix": {
+        "labels": [
+          "Fail",
+          "Pass"
+        ],
+        "values": [
+          [
+            5,
+            6
+          ],
+          [
+            3,
+            1670
+          ]
+        ]
+      }
+    }
+  }
+}

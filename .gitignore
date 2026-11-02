@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+.venv/
+env/
+venv/
+ENV/
+.firebase/
+.firebaserc
+uploads/*
+!uploads/.gitkeep
+downloads/*
+!downloads/.gitkeep
+*.log

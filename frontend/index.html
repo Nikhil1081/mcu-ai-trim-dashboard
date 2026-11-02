@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MCU AI Trim &amp; Wafer Sort Console</title>
+  <script>
+    (function() {
+      const userStr = localStorage.getItem('mcu_user');
+      if (!userStr) {
+        window.location.replace('auth.html');
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="mcu-dark-theme">
+
+<!-- Top Telemetry Status Ribbon -->
+<aside class="telemetry-ribbon" aria-label="System status">
+  <div class="ribbon-inner">
+    <div class="telemetry-item">
+      <span class="status-pulse-led"></span>
+      <span class="t-label">ATE SYSTEM:</span>
+      <span class="t-val highlight">ADVANTEST V93000 ONLINE</span>
+    </div>
+    <div class="telemetry-item">
+      <span class="t-label">FAB NODE:</span>
+      <span class="t-val">40nm eFlash MCU Process</span>
+    </div>
+    <div class="telemetry-item">
+      <span class="t-label">STATION:</span>
+      <span class="t-val">SORT-1 LASER FUSE TRIM</span>
+    </div>
+    <div class="telemetry-item">
+      <span class="t-label">CALIBRATION:</span>
+      <span class="t-val highlight-green">AI MODEL INFERENCE READY</span>
+    </div>
+  </div>
+</aside>
+
+<!-- App Header -->
+<header class="app-header">
+  <div class="header-container">
+    <div class="brand">
+      <div class="brand-logo-box">
+        <!-- Semiconductor AI Chip SVG Logo -->
+        <svg class="header-logo-svg" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="mcuBody" x1="10" y1="10" x2="70" y2="70" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#0f172a"/>
+              <stop offset="0.5" stop-color="#1e1b4b"/>
+              <stop offset="1" stop-color="#020617"/>
+            </linearGradient>
+            <linearGradient id="neonGlow" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#38bdf8"/>
+              <stop offset="0.5" stop-color="#818cf8"/>
+              <stop offset="1" stop-color="#06b6d4"/>
+            </linearGradient>
+            <linearGradient id="pinGold" x1="0" y1="0" x2="0" y2="1">
+              <stop stop-color="#38bdf8"/>
+              <stop offset="1" stop-color="#6366f1"/>
+            </linearGradient>
+          </defs>
+          <!-- Pins -->
+          <rect x="24" y="3" width="4" height="10" rx="2" fill="url(#pinGold)"/>
+          <rect x="34" y="3" width="4" height="10" rx="2" fill="url(#pinGold)"/>
+          <rect x="44" y="3" width="4" height="10" rx="2" fill="url(#pinGold)"/>
+          <rect x="54" y="3" width="4" height="10" rx="2" fill="url(#pinGold)"/>
+          <rect x="24" y="67" width="4" height="10" rx="2" fill="url(#pinGold)"/>
+          <rect x="34" y="67" width="4" height="10" rx="2" fill="url(#pinGold)"/>
+          <rect x="44" y="67" width="4" height="10" rx="2" fill="url(#pinGold)"/>
+          <rect x="54" y="67" width="4" height="10" rx="2" fill="url(#pinGold)"/>
+          <rect x="3" y="24" width="10" height="4" rx="2" fill="url(#pinGold)"/>
+          <rect x="3" y="34" width="10" height="4" rx="2" fill="url(#pinGold)"/>
+          <rect x="3" y="44" width="10" height="4" rx="2" fill="url(#pinGold)"/>
+          <rect x="3" y="54" width="10" height="4" rx="2" fill="url(#pinGold)"/>
+          <rect x="67" y="24" width="10" height="4" rx="2" fill="url(#pinGold)"/>
+          <rect x="67" y="34" width="10" height="4" rx="2" fill="url(#pinGold)"/>
+          <rect x="67" y="44" width="10" height="4" rx="2" fill="url(#pinGold)"/>
+          <rect x="67" y="54" width="10" height="4" rx="2" fill="url(#pinGold)"/>
+          <!-- Package -->
+          <rect x="10" y="10" width="60" height="60" rx="14" fill="url(#mcuBody)" stroke="url(#neonGlow)" stroke-width="2"/>
+          <rect x="22" y="22" width="36" height="36" rx="8" fill="#030712" stroke="#4f46e5" stroke-width="1.5"/>
+          <path d="M22 32H32M48 32H58M22 48H32M48 48H58M32 22V32M48 22V32M32 48V58M48 48V58" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="40" cy="40" r="7" fill="url(#neonGlow)"/>
+          <circle cx="40" cy="40" r="3.5" fill="#ffffff"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <div class="brand-topline">
+          <span class="console-tag">ATE CONSOLE v3.4</span>
+          <span class="foundry-tag">SILICON TRIM ENGINE</span>
+        </div>
+        <h1 class="brand-title">MCU AI Trim &amp; Wafer Sort Console</h1>
+      </div>
+    </div>
+
+    <div class="user-control-area">
+      <div class="user-pill">
+        <span class="user-avatar-circle" id="user-avatar-initial">U</span>
+        <div class="user-text-info">
+          <span class="user-email-text" id="user-display-email">Operator</span>
+          <span class="role-badge role-user" id="user-display-role">USER</span>
+        </div>
+      </div>
+      <a href="#" id="admin-link" class="btn-admin-action" style="display:none;" target="_blank">Admin Control</a>
+      <button type="button" id="btn-logout" class="btn-logout-main" title="Sign out of station">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+        </svg>
+        <span>Logout</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="console-layout">
+
+  <!-- Telemetry KPI Dashboard Cards -->
+  <section class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon-wrap cyan">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+      </div>
+      <div>
+        <div class="kpi-label">Wafer Database Dies</div>
+        <div class="kpi-value" id="rows">--</div>
+        <div class="kpi-sub">Total measured units in fab</div>
+      </div>
+    </div>
+    
+    <div class="kpi-card">
+      <div class="kpi-icon-wrap green">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+      </div>
+      <div>
+        <div class="kpi-label">Final Test Pass Rate</div>
+        <div class="kpi-value highlight-green" id="pass-rate">--</div>
+        <div class="kpi-sub">Baseline factory yield</div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon-wrap indigo">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+      </div>
+      <div>
+        <div class="kpi-label">Bandgap Trim Accuracy</div>
+        <div class="kpi-value highlight-cyan" id="bg-acc">--</div>
+        <div class="kpi-sub">Within &plusmn;1 Fuse code accuracy</div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon-wrap amber">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+      </div>
+      <div>
+        <div class="kpi-label">Pass Quality Recall</div>
+        <div class="kpi-value highlight-amber" id="recall">--</div>
+        <div class="kpi-sub">Screening sensitivity rate</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Trim Engine & Wafer Map Section -->
+  <div class="trim-workspace-grid">
+    
+    <!-- Left: Single Die Trim Parameter Form -->
+    <section class="console-panel trim-input-panel">
+      <div class="panel-header">
+        <div class="panel-title-group">
+          <svg class="panel-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
+          <h2>Die Parametric Prober</h2>
+        </div>
+        
+        <!-- Preset Scenario Buttons -->
+        <div class="preset-pill-group">
+          <span class="preset-label">FAB SCENARIO:</span>
+          <button type="button" class="preset-btn active" onclick="loadScenario('nominal')">Center Nominal</button>
+          <button type="button" class="preset-btn" onclick="loadScenario('slow')">Slow Corner</button>
+          <button type="button" class="preset-btn" onclick="loadScenario('fast')">Fast Corner</button>
+          <button type="button" class="preset-btn" onclick="loadScenario('edge')">Wafer Edge</button>
+        </div>
+      </div>
+
+      <form id="predict-form" class="instrument-form">
+        
+        <!-- Group 1: Silicon Wafer Position -->
+        <fieldset class="param-fieldset">
+          <legend>
+            <span class="legend-badge">01</span>
+            <span>Wafer Coordinates &amp; Radial Position</span>
+          </legend>
+          <div class="fields-row">
+            <label class="field-item">
+              <span class="f-name">Die X Grid</span>
+              <input type="number" id="inp-die-x" name="die_x" value="9" required>
+            </label>
+            <label class="field-item">
+              <span class="f-name">Die Y Grid</span>
+              <input type="number" id="inp-die-y" name="die_y" value="1" required>
+            </label>
+            <label class="field-item">
+              <span class="f-name">X Pos (mm)</span>
+              <input type="number" step="any" id="inp-x-mm" name="x_mm" value="-24" required>
+            </label>
+            <label class="field-item">
+              <span class="f-name">Y Pos (mm)</span>
+              <input type="number" step="any" id="inp-y-mm" name="y_mm" value="-88" required>
+            </label>
+            <label class="field-item">
+              <span class="f-name">Radius (mm)</span>
+              <input type="number" step="any" id="inp-radius" name="radius_mm" value="91.21" required>
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- Group 2: Process Control Monitor (PCM) -->
+        <fieldset class="param-fieldset">
+          <legend>
+            <span class="legend-badge">02</span>
+            <span>Process Control Monitor (PCM Electricals)</span>
+          </legend>
+          <div class="fields-row">
+            <label class="field-item">
+              <span class="f-name">NMOS Vth (mV)</span>
+              <input type="number" step="any" id="inp-pcm-vth-n" name="pcm_vth_n_mV" value="452.04" required>
+            </label>
+            <label class="field-item">
+              <span class="f-name">PMOS Vth (mV)</span>
+              <input type="number" step="any" id="inp-pcm-vth-p" name="pcm_vth_p_mV" value="-477.49" required>
+            </label>
+            <label class="field-item">
+              <span class="f-name">Sheet Resistance (&Omega;/sq)</span>
+              <input type="number" step="any" id="inp-pcm-rs" name="pcm_rs_ohm_sq" value="284.88" required>
+            </label>
+            <label class="field-item">
+              <span class="f-name">Oxide Thickness (&Aring;)</span>
+              <input type="number" step="any" id="inp-pcm-tox" name="pcm_tox_A" value="20.435" required>
+            </label>
+            <label class="field-item">
+              <span class="f-name">Relative Mobility</span>
+              <input type="number" step="any" id="inp-pcm-mobility" name="pcm_mobility_rel" value="1.0356" required>
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- Group 3: Untrimmed Analog Measurements (Primary Target Drivers) -->
+        <fieldset class="param-fieldset highlight-border">
+          <legend>
+            <span class="legend-badge cyan">03</span>
+            <span>Untrimmed Analog Sensors (Key Drivers)</span>
+          </legend>
+          <div class="fields-row">
+            <label class="field-item key-driver">
+              <span class="f-name">Bandgap Untrimmed (V)</span>
+              <input type="number" step="any" id="inp-bg-untrim" name="bg_untrim_V" value="1.19017" required>
+              <span class="f-target">Nominal Target: 1.200 V</span>
+            </label>
+            <label class="field-item key-driver">
+              <span class="f-name">HSI Untrimmed (MHz)</span>
+              <input type="number" step="any" id="inp-hsi-untrim" name="hsi_untrim_MHz" value="16.98648" required>
+              <span class="f-target">Nominal Target: 16.00 MHz</span>
+            </label>
+            <label class="field-item key-driver">
+              <span class="f-name">LDO Untrimmed (V)</span>
+              <input type="number" step="any" id="inp-ldo-untrim" name="ldo_untrim_V" value="1.09439" required>
+              <span class="f-target">Nominal Target: 1.100 V</span>
+            </label>
+            <label class="field-item">
+              <span class="f-name">Temp Sensor @30&deg;C (Counts)</span>
+              <input type="number" id="inp-ts-cal" name="ts_cal1_30C_counts" value="1055" required>
+            </label>
+            <label class="field-item">
+              <span class="f-name">SRAM Fail Bits</span>
+              <input type="number" id="inp-sram-fail" name="sram_fail_bits" value="0" required>
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- Group 4: Device Configuration & Temp Grade -->
+        <fieldset class="param-fieldset">
+          <legend>
+            <span class="legend-badge">04</span>
+            <span>Derivative &amp; Packaging Specs</span>
+          </legend>
+          <div class="fields-row">
+            <label class="field-item">
+              <span class="f-name">Derivative</span>
+              <select id="inp-derivative" name="derivative">
+                <option value="MCU-A">MCU-A (Standard Cortex-M4)</option>
+                <option value="MCU-B">MCU-B (Enhanced Crypto)</option>
+                <option value="MCU-C">MCU-C (Low-Power IoT)</option>
+              </select>
+            </label>
+            <label class="field-item">
+              <span class="f-name">Package Type</span>
+              <select id="inp-package" name="package">
+                <option value="QFN48">QFN48 (Quad Flat No-Lead)</option>
+                <option value="QFN32">QFN32 (Compact Leadless)</option>
+                <option value="LQFP100">LQFP100 (100-pin Low Profile)</option>
+              </select>
+            </label>
+            <label class="field-item">
+              <span class="f-name">Temperature Grade</span>
+              <select id="inp-temp-grade" name="temp_grade">
+                <option value="industrial">Industrial (-40&deg;C to +85&deg;C)</option>
+                <option value="automotive">Automotive AEC-Q100 Grade 1</option>
+              </select>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="form-action-bar">
+          <button type="submit" id="btn-run-trim" class="btn-laser-trim">
+            <span class="btn-laser-beam"></span>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M13 2.05v2.02c3.95.49 7 3.85 7 7.93 0 1.45-.39 2.81-1.07 3.98l1.74 1.01A9.955 9.955 0 0022 12c0-5.18-3.95-9.45-9-9.95zM12 19c-3.87 0-7-3.13-7-7 0-3.53 2.61-6.43 6-6.92V3.03c-4.06.5-7.18 3.91-7.18 7.97 0 4.08 3.05 7.44 7 7.93v2.02c5.05-.5 9-4.76 9-9.95h-2c0 3.87-3.13 7-7 7z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>Execute AI Laser Trim Inference</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Right: Real-time Wafer Map & Dynamic Fuse Register Readout -->
+    <section class="console-panel trim-output-panel">
+      <div class="panel-header">
+        <div class="panel-title-group">
+          <svg class="panel-icon cyan" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+          <h2>Silicon Wafer Map &amp; Fuse Burn Status</h2>
+        </div>
+        <span class="wafer-specs-badge">300mm / 12-INCH WAFER</span>
+      </div>
+
+      <!-- Interactive SVG Wafer Map -->
+      <div class="wafer-map-container">
+        <div class="wafer-canvas-wrapper">
+          <svg id="wafer-svg" viewBox="0 0 340 340" width="100%" height="280">
+            <!-- Wafer Boundary -->
+            <circle cx="170" cy="170" r="150" class="wafer-body"/>
+            <!-- Wafer Flat / Notch at bottom -->
+            <path d="M162 319.8 A 150 150 0 0 0 178 319.8 L 170 312 Z" class="wafer-notch"/>
+            <!-- Concentric Radial Zones -->
+            <circle cx="170" cy="170" r="50" class="wafer-zone-ring"/>
+            <circle cx="170" cy="170" r="100" class="wafer-zone-ring"/>
+            <circle cx="170" cy="170" r="140" class="wafer-zone-ring-outer"/>
+            <!-- Center Crosshairs -->
+            <line x1="170" y1="20" x2="170" y2="320" class="wafer-axis"/>
+            <line x1="20" y1="170" x2="320" y2="170" class="wafer-axis"/>
+            
+            <!-- Die Grid Background Simulation -->
+            <g id="wafer-die-grid" class="die-grid-group"></g>
+
+            <!-- Target Die Reticle -->
+            <g id="target-reticle" transform="translate(146, 82)">
+              <rect x="-10" y="-10" width="20" height="20" class="reticle-box"/>
+              <line x1="-16" y1="0" x2="16" y2="0" class="reticle-line"/>
+              <line x1="0" y1="-16" x2="0" y2="16" class="reticle-line"/>
+              <circle cx="0" cy="0" r="4" class="reticle-center"/>
+            </g>
+          </svg>
+        </div>
+        <div class="wafer-telemetry-legend">
+          <div class="legend-row">
+            <span class="legend-dot cyan"></span>
+            <span>Target Die Coordinates: <code id="disp-die-coords">X: 9, Y: 1</code></span>
+          </div>
+          <div class="legend-row">
+            <span class="legend-dot amber"></span>
+            <span>Radial Distance: <code id="disp-radius-val">91.21 mm (Zone 2: Mid)</code></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fuse Registers & Final Pass Result Display -->
+      <div id="prediction-result" class="trim-results-display">
+        <div class="result-placeholder">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          <p>Ready for inference. Click <strong>Execute AI Laser Trim</strong> to compute optimal fuse codes.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Model Performance Telemetry Panel -->
+  <section class="console-panel">
+    <div class="panel-header">
+      <div class="panel-title-group">
+        <svg class="panel-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+        <h2>Trained AI Model Metrology</h2>
+      </div>
+      <span class="badge-status">VALIDATED ON HISTORICAL SORT-1 RUNS</span>
+    </div>
+    <div id="metrics" class="metrics-grid"></div>
+  </section>
+
+  <!-- Bulk Wafer CSV Screening Station -->
+  <section class="console-panel">
+    <div class="panel-header">
+      <div class="panel-title-group">
+        <svg class="panel-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+        <h2>Bulk Wafer Lot Screening (Batch ATE Process)</h2>
+      </div>
+      <span class="badge-status">CSV INGESTION ENGINE</span>
+    </div>
+
+    <div class="bulk-upload-zone">
+      <div class="upload-drop-card" id="drop-zone">
+        <input type="file" id="csv-file" accept=".csv" class="file-input-hidden">
+        <svg class="upload-icon" viewBox="0 0 24 24" width="40" height="40" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+        <div class="upload-text-primary">Drag &amp; drop wafer lot CSV or <span class="file-browse-btn" onclick="document.getElementById('csv-file').click()">browse file</span></div>
+        <div class="upload-text-secondary" id="selected-filename">Accepts raw prober test CSV with electrical parameters</div>
+        <button type="button" id="upload-btn" class="btn-bulk-execute">
+          <span>Run Batch Trim &amp; Quality Screening</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="upload-status" class="upload-status-bar"></div>
+    <div id="upload-preview" class="table-container"></div>
+  </section>
+
+</main>
+
+<footer class="app-footer">
+  <div class="footer-inner">
+    <div>&copy; 2026 MCU AI Predictive Trim Console &bull; Semiconductor Foundry Quality Screening</div>
+    <div class="footer-links">
+      <span>Calibrated for 40nm MCU Architecture</span>
+      <span>&bull;</span>
+      <span>Station ID: FAB-ATE-09</span>
+    </div>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
