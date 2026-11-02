@@ -1,4 +1,14 @@
-# Synthetic dataset: AI-optimized trim & fuse for derivative chips
+# MCU AI Trim & Wafer Sort Console
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Nikhil1081/mcu-ai-trim-dashboard)
+[![Firebase Hosting](https://img.shields.io/badge/Firebase_Hosting-Live_Console-FFCA28?logo=firebase&logoColor=black)](https://mcu-trim-console-1081.web.app)
+
+- **Frontend (Live on Firebase):** [https://mcu-trim-console-1081.web.app](https://mcu-trim-console-1081.web.app)
+- **1-Click Backend Deploy (Render):** [Deploy to Render](https://render.com/deploy?repo=https://github.com/Nikhil1081/mcu-ai-trim-dashboard)
+
+---
+
+## Dataset: AI-Optimized Trim & Fuse for Derivative Chips
 
 A synthetic, reproducible dataset for developing and testing the solution described in *AI-Optimized Trim & Fuse for Derivative Chips*. It covers all four chip types (MCU, PMIC, sensor and SoC), with three derivatives each, plus fuse-map, OTP-configuration, memory-repair and SKU-demand tables.
 
